@@ -4,6 +4,8 @@ import cors from 'cors';
 
 import { db } from './models/index.js';
 
+import {route} from './routes/index.js';
+
 (async () => {
   try {
     await db.mongoose.connect(db.url, {
@@ -16,6 +18,8 @@ import { db } from './models/index.js';
 })();
 
 const app = express();
+app.use(express.json());
+app.use(route);
 
 //define o dominio de origem para consumo do servico
 app.use(bodyParser.json());
