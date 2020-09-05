@@ -1,18 +1,14 @@
-import express from "express";
+ 
+import express from 'express';
+import controller from '../controllers/gradesController.js'
 
-import {
-  destroy,
-  destroyAll,
-  update,
-  store,
-  index,
-  show,
-} from "../controllers/gradesController.js";
+const app = express();
 
-const route = express();
+app.post('/grade/', controller.create);
+app.get('/grade/', controller.findAll);
+app.get('/grade/:id', controller.findOne);
+app.put('/grade/:id', controller.update);
+app.delete('/grade/:id', controller.remove);
+app.delete('/grade/', controller.removeAll);
 
-route.route("/grade").get(index).post(store).delete(destroyAll);
-
-route.route("/grade/:id").put(update).delete(destroy).get(show);
-
-export { route };
+export { app as gradeRouter };

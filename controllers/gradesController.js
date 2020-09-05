@@ -1,62 +1,71 @@
 import { db } from "../models/index.js";
+import { logger } from "../config/logger.js";
 
 const Grade = db.gradesModel;
 
-const index = async (req, res) => {
+const create = async (req, res) => {
   try {
-    if (req.query.name) {
-      const { name } = req.query;
-      const data = await Grade.findOne({ name });
-      return res.json(data);
-    } else {
-      const data = await Grade.find({});
-
-      return res.json(data);
-    }
+    logger.info(`POST /grade - ${JSON.stringify()}`);
+    await Grade.create(req.body);
+    res.send({ message: "Grade inserido com sucesso" });
   } catch (error) {
-    return res.status(500).json({ error });
+    res
+      .status(500)
+      .send({ message: error.message || "Algum erro ocorreu ao salvar" });
+    logger.error(`POST /grade - ${JSON.stringify(error.message)}`);
   }
 };
 
-const show = async (req, res) => {
+const findAll = async (req, res) => {
+  const name = req.query.name;
+
+  //condicao para o filtro no findAll
+  var condition = name
+    ? { name: { $regex: new RegExp(name), $options: "i" } }
+    : {};
+
   try {
-    const { id } = req.params;
+    logger.info(`GET /grade`);
 
-    const data = await Grade.findById(id);
+    const data = await Grade.find(condition);
+    return res.json(data);
 
+  } catch (error) {
+    res
+      .status(500)
+      .send({ message: error.message || "Erro ao listar todos os documentos" });
+    logger.error(`GET /grade - ${JSON.stringify(error.message)}`);
+  }
+};
+
+const findOne = async (req, res) => {
+  const id = req.params.id;
+
+  try {
+    logger.info(`GET /grade - ${id}`);
+
+    const data = await Grade.findOne({ _id: id });
     return res.json(data);
   } catch (error) {
-    return res.status(500).json({ error });
-  }
-};
-
-const store = async (req, res) => {
-  try {
-    await Grade.create(req.body);
-
-    return res.status(200).json({ message: "Criado com sucesso" });
-  } catch (error) {
-    return res.status(500).json({ error });
-  }
-};
-
-const destroyAll = async (req, res) => {
-  try {
-    await Grade.deleteMany();
-
-    return res
-      .status(200)
-      .json({ message: "Todos os registros deletados com sucesso" });
-  } catch (error) {
-    return res.status(500).json({ error });
+    res.status(500).send({ message: "Erro ao buscar o Grade id: " + id });
+    logger.error(`GET /grade - ${JSON.stringify(error.message)}`);
   }
 };
 
 const update = async (req, res) => {
+  if (!req.body) {
+    return res.status(400).send({
+      message: "Dados para atualizacao vazio",
+    });
+  }
+
   const { name, subject, type, value } = req.body;
-  const { id } = req.params;
+
+  const id = req.params.id;
 
   try {
+    logger.info(`PUT /grade - ${id} - ${JSON.stringify(req.body)}`);
+
     const data = await Grade.findOneAndUpdate(
       { _id: id },
       {
@@ -71,21 +80,36 @@ const update = async (req, res) => {
     );
 
     return res.json(data);
+
   } catch (error) {
-    return res.status(500).json({ error });
+    res.status(500).send({ message: "Erro ao atualizar a Grade id: " + id });
+    logger.error(`PUT /grade - ${JSON.stringify(error.message)}`);
   }
 };
 
-const destroy = async (req, res) => {
-  const { id } = req.params;
+const remove = async (req, res) => {
+  const id = req.params.id;
 
   try {
+    logger.info(`DELETE /grade - ${id}`);
     await Grade.findOneAndRemove({ _id: id });
-
-    return res.status(200).json({ message: "Deletado com sucesso!" });
   } catch (error) {
-    return res.status(500).json({ error });
+    res
+      .status(500)
+      .send({ message: "Nao foi possivel deletar o Grade id: " + id });
+    logger.error(`DELETE /grade - ${JSON.stringify(error.message)}`);
   }
 };
 
-export { index, store, destroyAll, update, destroy, show };
+const removeAll = async (req, res) => {
+  try {
+    logger.info(`DELETE /grade`);
+    await Grade.deleteMany();
+
+  } catch (error) {
+    res.status(500).send({ message: "Erro ao excluir todos as Grades" });
+    logger.error(`DELETE /grade - ${JSON.stringify(error.message)}`);
+  }
+};
+
+export default { create, findAll, findOne, update, remove, removeAll };

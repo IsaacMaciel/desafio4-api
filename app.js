@@ -4,7 +4,7 @@ import cors from 'cors';
 
 import { db } from './models/index.js';
 
-import {route} from './routes/index.js';
+import {gradeRouter} from './routes/index.js';
 
 (async () => {
   try {
@@ -29,7 +29,7 @@ app.use(
   })
   );
   
-app.use(route);
+app.use(gradeRouter);
 app.get('/', (req, res) => {
   res.send('API em execucao');
 });
