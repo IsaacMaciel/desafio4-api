@@ -14,6 +14,14 @@ const index = async (req, res) => {
   }
 };
 
+const show = async (req, res) => {
+  const { id } = req.params;
+
+  const data = await Grade.findById(id);
+
+  return res.json(data);
+};
+
 const store = async (req, res) => {
   await Grade.create(req.body);
 
@@ -46,22 +54,14 @@ const update = async (req, res) => {
   );
 
   return res.json(data);
-
 };
 
-const destroy = async (req,res) => {
+const destroy = async (req, res) => {
   const { id } = req.params;
 
-  await Grade.findOneAndRemove({id});
+  await Grade.findOneAndRemove({ id });
 
-  return res.status(200).json({message: "Deletado com sucesso!"});
-  
-}
+  return res.status(200).json({ message: "Deletado com sucesso!" });
+};
 
-export {
-    index,
-    store,
-    destroyAll,
-    update,
-    destroy
-}
+export { index, store, destroyAll, update, destroy,show };
